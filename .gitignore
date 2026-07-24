@@ -4,3 +4,7 @@ dist-ssr
 *.local
 .DS_Store
 .vite
+
+# 備份 / 暫存（Claude 產生）
+*.bak
+_to_delete/
