@@ -1,0 +1,19 @@
+const { parse } = require("@babel/parser");
+const { readFileSync } = require("fs");
+const files = [
+  "src/theme/system.js",
+  "src/components/AuroraBackground.jsx",
+  "src/components/Tag.jsx",
+  "src/components/MapLinks.jsx",
+  "src/components/StopCard.jsx",
+  "src/components/Itinerary.jsx",
+  "src/App.jsx",
+];
+let bad = 0;
+for (const f of files) {
+  try {
+    parse(readFileSync(f, "utf8"), { sourceType: "module", plugins: ["jsx"] });
+    console.log("OK  ", f);
+  } catch (e) { bad++; console.log("FAIL", f, "->", e.message); }
+}
+process.exit(bad ? 1 : 0);

@@ -1,0 +1,52 @@
+import { Box } from "@chakra-ui/react";
+import { motion, useReducedMotion } from "framer-motion";
+
+const Blob = motion.div;
+
+const BLOBS = [
+  { size: 480, top: -130, left: -90, color: "#0EA5E9", delay: 0 },
+  { size: 420, top: -40, right: -70, color: "#8B5CF6", delay: -4 },
+  { size: 400, top: "44%", left: "34%", color: "#10B981", delay: -8 },
+  { size: 360, top: "70%", right: "6%", color: "#FB7185", delay: -12 },
+];
+
+export default function AuroraBackground() {
+  const reduce = useReducedMotion();
+  const animate = reduce
+    ? {}
+    : { x: [0, 38, -28, 0], y: [0, 26, 18, 0], scale: [1, 1.07, 0.95, 1] };
+
+  return (
+    <Box
+      position="fixed"
+      inset="0"
+      zIndex={-2}
+      overflow="hidden"
+      style={{
+        background:
+          "radial-gradient(120% 120% at 100% 0%, #dff3ff 0%, #f0f9ff 45%, #ffffff 100%)",
+      }}
+    >
+      {BLOBS.map((b, i) => (
+        <Blob
+          key={i}
+          animate={animate}
+          transition={{ duration: 17, repeat: Infinity, ease: "easeInOut", delay: b.delay }}
+          style={{
+            position: "absolute",
+            width: b.size,
+            height: b.size,
+            top: b.top,
+            left: b.left,
+            right: b.right,
+            borderRadius: "50%",
+            filter: "blur(72px)",
+            opacity: 0.5,
+            mixBlendMode: "multiply",
+            background: b.color,
+          }}
+        />
+      ))}
+    </Box>
+  );
+}

@@ -1,0 +1,70 @@
+import { Box, Container, Heading, Text, HStack } from "@chakra-ui/react";
+import dayjs from "dayjs";
+
+import { STOPS, NOTICES, RAIN, TRIP_DATE } from "../data/itinerary";
+import StopCard from "./StopCard";
+import NoticeBox from "./NoticeBox";
+
+function Countdown() {
+  const days = dayjs(TRIP_DATE).startOf("day").diff(dayjs().startOf("day"), "day");
+  let label = "7 / 25（六）· 高雄出發";
+  if (days > 0) label = `出發倒數 ${days} 天 · 7/25（六）`;
+  else if (days === 0) label = "就是今天！· 高雄出發";
+  return (
+    <HStack
+      display="inline-flex"
+      gap={2}
+      bg="rgba(255,255,255,0.75)"
+      border="1px solid"
+      borderColor="brand.200"
+      rounded="full"
+      px={4}
+      py={1.5}
+      boxShadow="0 6px 16px -10px rgba(12,74,110,0.4)"
+    >
+      <Box w="7px" h="7px" rounded="full" bg="aurora.tropical" boxShadow="0 0 0 4px rgba(16,185,129,0.2)" />
+      <Text fontWeight="700" fontSize="12.5px" color="brand.900">
+        {label}
+      </Text>
+    </HStack>
+  );
+}
+
+export default function Itinerary() {
+  return (
+    <Container maxW="760px" py={{ base: 5, md: 8 }} px={4}>
+      {/* 標題（精簡，無 Hero） */}
+      <Box textAlign="center" pt={2} pb={6}>
+        <Countdown />
+        <Heading as="h1" fontWeight="900" fontSize={{ base: "32px", md: "44px" }} mt={4} mb={1.5} color="brand.900">
+          嘉義
+          <Box
+            as="span"
+            style={{
+              background: "linear-gradient(120deg,#0EA5E9,#8B5CF6 55%,#FB7185)",
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+              color: "transparent",
+            }}
+          >
+            一日行程
+          </Box>
+        </Heading>
+        <Text color="#4B6B7E" fontSize="15px" fontWeight="500">
+          第一站 天來美術館 → 收尾 桃城豆花
+        </Text>
+      </Box>
+
+      {/* 注意事項 */}
+      <NoticeBox kind="warn" title="出發前先確認" rows={NOTICES} />
+      <NoticeBox kind="rain" title="雨天備案（週六約 66% 降雨・午後雷陣雨）" rows={RAIN} />
+
+      {/* 時間軸 */}
+      <Box mt={2}>
+        {STOPS.map((stop) => (
+          <StopCard key={stop.id} stop={stop} />
+        ))}
+      </Box>
+    </Container>
+  );
+}

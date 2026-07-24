@@ -1,0 +1,59 @@
+import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react";
+
+// Aurora UI 設計系統：極光漸層 + 玻璃質感
+const config = defineConfig({
+  theme: {
+    tokens: {
+      fonts: {
+        heading: { value: "'Noto Sans TC', sans-serif" },
+        body: { value: "'Noto Sans TC', sans-serif" },
+        num: { value: "'Outfit', sans-serif" },
+      },
+      colors: {
+        brand: {
+          50: { value: "#F0F9FF" },
+          100: { value: "#E0F2FE" },
+          200: { value: "#BAE6FD" },
+          300: { value: "#7DD3FC" },
+          400: { value: "#38BDF8" },
+          500: { value: "#0EA5E9" },
+          600: { value: "#0284C7" },
+          700: { value: "#0369A1" },
+          800: { value: "#075985" },
+          900: { value: "#0C4A6E" },
+        },
+        accent: {
+          500: { value: "#F97316" },
+          600: { value: "#EA580C" },
+        },
+        aurora: {
+          coral: { value: "#FB7185" },
+          tropical: { value: "#10B981" },
+          sunset: { value: "#F59E0B" },
+          violet: { value: "#8B5CF6" },
+          cyan: { value: "#06B6D4" },
+        },
+      },
+      radii: {
+        card: { value: "22px" },
+      },
+    },
+  },
+  globalCss: {
+    "html, body, #root": { minHeight: "100%" },
+    body: {
+      background: "#F0F9FF",
+      color: "#0B2A3D",
+      fontFamily: "body",
+      overflowX: "hidden",
+      lineHeight: 1.7,
+    },
+    "::selection": { background: "#BAE6FD" },
+    "@keyframes wl-pulse": {
+      "0%, 100%": { opacity: 0.5 },
+      "50%": { opacity: 0.85 },
+    },
+  },
+});
+
+export const system = createSystem(defaultConfig, config);

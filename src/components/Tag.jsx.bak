@@ -1,0 +1,29 @@
+import { Box } from "@chakra-ui/react";
+
+const STYLES = {
+  free: { bg: "#e5f0e8", color: "#3f7a5c" },
+  book: { bg: "#fbe6d8", color: "#b0532a" },
+  opt: { bg: "#eceef1", color: "#5b6b76" },
+  warn: { bg: "#fbe4e0", color: "#c0483a" },
+};
+
+export default function Tag({ label, kind = "opt" }) {
+  const s = STYLES[kind] || STYLES.opt;
+  return (
+    <Box
+      as="span"
+      display="inline-block"
+      ml={2}
+      fontSize="11px"
+      fontWeight="700"
+      px={2.5}
+      py={0.5}
+      rounded="full"
+      verticalAlign="middle"
+      bg={s.bg}
+      color={s.color}
+    >
+      {label}
+    </Box>
+  );
+}

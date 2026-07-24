@@ -1,0 +1,43 @@
+import { HStack, Box } from "@chakra-ui/react";
+import { FiMapPin, FiExternalLink } from "react-icons/fi";
+
+const STYLES = {
+  gmap: { bg: "#eaf2ff", color: "#2f6bd6", icon: <FiMapPin size={13} /> },
+  amap: { bg: "#edeef1", color: "#3a3a3c", icon: <FiMapPin size={13} /> },
+  blog: { bg: "#f2ede6", color: "#7a6a55", icon: <FiExternalLink size={13} /> },
+};
+
+export default function MapLinks({ links = [] }) {
+  if (!links.length) return null;
+  return (
+    <HStack gap={2} flexWrap="wrap" mt={2.5}>
+      {links.map(([type, label, href], i) => {
+        const s = STYLES[type] || STYLES.blog;
+        return (
+          <Box
+            as="a"
+            key={i}
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            display="inline-flex"
+            alignItems="center"
+            gap={1.5}
+            fontSize="12.5px"
+            fontWeight="700"
+            px={3}
+            py={1.5}
+            rounded="full"
+            bg={s.bg}
+            color={s.color}
+            transition="transform .15s ease"
+            _hover={{ transform: "translateY(-2px)" }}
+          >
+            {s.icon}
+            {label}
+          </Box>
+        );
+      })}
+    </HStack>
+  );
+}
