@@ -1,206 +1,127 @@
-import { Box, Flex, Text, HStack } from "@chakra-ui/react";
-import { TbCar } from "react-icons/tb";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { FreeMode, Mousewheel } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/free-mode";
+import { Car, ChevronRight, Footprints, Ship } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import Reveal from "./Reveal";
 import Tag from "./Tag";
-import MapLinks from "./MapLinks";
 
-// ── 時間軸尺寸 ──────────────────────────────
-const LINE = "rgba(125,211,252,0.22)"; // 路線顏色
-const RAIL_W = "52px";                  // 左側軌道欄寬
-const LINE_X = "26px";                  // 路線中心 x
-const DOT = 30;                         // 車站節點直徑
-const DOT_TOP = 15;                     // 節點與卡片標題對齊的上緣位移
-const CENTER = DOT_TOP + DOT / 2;       // 節點中心 y = 30
-const RING = "#0a1a2b";                 // 節點外環（貼近底色）
+const LEG_ICONS = { car: Car, walk: Footprints, ferry: Ship };
 
-function grad(g) {
-  return `linear-gradient(135deg, ${g[0]}, ${g[1]})`;
-}
-
-function OptionCard({ opt }) {
+// 左側時間軸：細線 + 編號節點
+function Rail({ node, isFirst, isLast, hasLeg }) {
   return (
-    <Box h="100%" bg="rgba(255,255,255,0.05)" border="1px solid" borderColor="rgba(255,255,255,0.09)" rounded="14px" p={3.5}>
-      <Text fontWeight="900" fontSize="15px" color="#EAF3FA">
-        {opt.name}
-        {opt.badge && <Tag label={opt.badge[0]} kind={opt.badge[1]} />}
-      </Text>
-      <Text fontSize="12.5px" color="#9DB4C6" mt={1}>
-        {opt.desc}
-      </Text>
-      <MapLinks links={opt.links} />
-    </Box>
-  );
-}
-
-// 車站節點 + 上下路線段
-function Rail({ gradient, node, isFirst, isLast, hasLeg }) {
-  const showTop = !isFirst;
-  const showBottom = hasLeg || !isLast;
-  return (
-    <Box position="relative" w={RAIL_W} flex="none">
-      {showTop && (
-        <Box position="absolute" left={LINE_X} top="0" h={`${CENTER}px`} w="2px" transform="translateX(-1px)" bg={LINE} />
+    <div className="relative w-[42px] shrink-0">
+      {!isFirst && <span className="absolute left-[21px] top-0 h-[26px] w-px -translate-x-1/2 bg-border" />}
+      {(hasLeg || !isLast) && (
+        <span className="absolute bottom-0 left-[21px] top-[26px] w-px -translate-x-1/2 bg-border" />
       )}
-      {showBottom && (
-        <Box position="absolute" left={LINE_X} top={`${CENTER}px`} bottom="0" w="2px" transform="translateX(-1px)" bg={LINE} />
-      )}
-      <Flex
-        position="absolute"
-        top={`${DOT_TOP}px`}
-        left={LINE_X}
-        transform="translateX(-50%)"
-        w={`${DOT}px`}
-        h={`${DOT}px`}
-        align="center"
-        justify="center"
-        rounded="full"
-        color="white"
-        fontFamily="num"
-        fontWeight="800"
-        fontSize="13px"
-        style={{ background: grad(gradient), textShadow: "0 1px 2px rgba(0,0,0,0.35)" }}
-        boxShadow={`0 0 0 4px ${RING}, 0 8px 18px -6px rgba(0,0,0,0.6)`}
-      >
+      <span className="absolute left-[21px] top-3 flex size-6 -translate-x-1/2 items-center justify-center rounded-full bg-foreground text-[11px] font-bold text-background ring-4 ring-background">
         {node}
-      </Flex>
-    </Box>
+      </span>
+    </div>
   );
 }
 
-// 交通段：路線上的車輛節點 + 標籤
-function LegRow({ label }) {
+function LegRow({ label, icon = "car" }) {
+  const Icon = LEG_ICONS[icon] || Car;
   return (
-    <Flex align="stretch">
-      <Box position="relative" w={RAIL_W} flex="none">
-        <Box position="absolute" left={LINE_X} top="0" bottom="0" w="2px" transform="translateX(-1px)" bg={LINE} />
-        <Flex
-          position="absolute"
-          top="50%"
-          left={LINE_X}
-          transform="translate(-50%,-50%)"
-          w="26px"
-          h="26px"
-          align="center"
-          justify="center"
-          rounded="full"
-          bg={RING}
-          border="2px solid"
-          borderColor={LINE}
-          color="#9DB4C6"
-        >
-          <TbCar size={14} />
-        </Flex>
-      </Box>
-      <Flex flex="1" align="center" py="13px">
-        <HStack
-          gap={1.5}
-          bg="rgba(255,255,255,0.05)"
-          border="1px solid rgba(255,255,255,0.09)"
-          rounded="full"
-          px={3}
-          py={1}
-          color="#9DB4C6"
-          fontSize="12.5px"
-          fontWeight="700"
-        >
-          <Text>{label}</Text>
-        </HStack>
-      </Flex>
-    </Flex>
+    <div className="flex items-stretch">
+      <div className="relative w-[42px] shrink-0">
+        <span className="absolute bottom-0 left-[21px] top-0 w-px -translate-x-1/2 bg-border" />
+        <span className="absolute left-[21px] top-1/2 flex size-[22px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border bg-background text-muted-foreground">
+          <Icon className="size-3" />
+        </span>
+      </div>
+      <div className="flex flex-1 items-center py-2">
+        <Badge variant="secondary" className="rounded-full text-[11px] font-semibold text-muted-foreground shadow-none">
+          {label}
+        </Badge>
+      </div>
+    </div>
   );
 }
 
-export default function StopCard({ stop, node, isFirst, isLast }) {
-  const { time, title, tags, meta, note, links, options, gradient, legAfter } = stop;
+// 時間軸上的卡片只放摘要，細節都在詳細頁（點卡片展開）
+export default function StopCard({ stop, node, isFirst, isLast, onOpen }) {
+  const { time, title, tags, meta, note, options, photo, legAfter, legIcon } = stop;
+
+  const lead = meta?.[0]?.[1];
+  const optionNames = options?.map((o) => o.name).join("・");
+  const altCount = stop.alternatives?.length || 0;
 
   return (
     <>
-      <Flex align="stretch">
-        <Rail gradient={gradient} node={node} isFirst={isFirst} isLast={isLast} hasLeg={!!legAfter} />
+      <div className="flex items-stretch">
+        <Rail node={node} isFirst={isFirst} isLast={isLast} hasLeg={!!legAfter} />
 
-        <Box flex="1" minW="0" pb={legAfter ? "0" : "22px"}>
+        <div className={`min-w-0 flex-1 ${legAfter ? "" : "pb-3"}`}>
           <Reveal>
-            <Box
-              position="relative"
-              bg="rgba(16,32,49,0.55)"
-              backdropFilter="blur(16px)"
-              border="1px solid rgba(255,255,255,0.09)"
-              rounded="card"
-              boxShadow="0 24px 50px -24px rgba(0,0,0,0.75)"
-              p={4}
-              overflow="hidden"
+            <button
+              type="button"
+              onClick={onOpen}
+              aria-label={`查看 ${title} 的詳細資訊`}
+              className="w-full overflow-hidden rounded-xl border bg-secondary text-left transition-colors hover:bg-secondary/70"
             >
-              <HStack gap={2.5} mb={2} align="center" flexWrap="wrap">
-                <Box
-                  flex="none"
-                  color="white"
-                  fontFamily="num"
-                  fontWeight="800"
-                  fontSize="13px"
-                  px={3}
-                  py={1.5}
-                  rounded="10px"
-                  whiteSpace="nowrap"
-                  style={{ background: grad(gradient) }}
-                  boxShadow="0 8px 16px -8px rgba(0,0,0,0.6)"
-                >
-                  {time}
-                </Box>
-                <Text fontWeight="900" fontSize="19px" color="#EAF3FA" lineHeight="1.25">
-                  {title}
-                  {tags && tags.map((t, i) => <Tag key={i} label={t[0]} kind={t[1]} />)}
-                </Text>
-              </HStack>
+                {photo && (
+                  <div className="relative">
+                    <img src={photo} alt="" className="h-[88px] w-full object-cover" loading="lazy" />
+                    {stop.photoGeneric && (
+                      <span className="absolute bottom-1.5 left-2 rounded bg-black/45 px-1.5 py-px text-[9.5px] font-bold text-white/90">
+                        示意圖
+                      </span>
+                    )}
+                  </div>
+                )}
 
-              {meta &&
-                meta.map(([k, v], i) => (
-                  <Text key={i} fontSize="13.5px" color="#9DB4C6" my={0.5}>
-                    <Box as="b" color="#DCE9F3" fontWeight="700" mr={2}>
-                      {k}
-                    </Box>
-                    {v}
-                  </Text>
-                ))}
+                <div className="p-3">
+                  <div className="flex items-start gap-2">
+                    <div className="flex flex-1 flex-wrap items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="shrink-0 rounded-full bg-background text-[10.5px] font-bold shadow-none"
+                      >
+                        {time}
+                      </Badge>
+                      <h3 className="text-[15px] font-bold leading-[1.3] text-foreground">
+                        {title}
+                        {tags?.map((t, i) => <Tag key={i} label={t[0]} kind={t[1]} />)}
+                      </h3>
+                    </div>
+                    <span className="mt-0.5 flex shrink-0 items-center gap-1">
+                      {altCount > 0 && (
+                        <span className="text-[10px] font-medium text-muted-foreground/60">
+                          備案 {altCount}
+                        </span>
+                      )}
+                      <ChevronRight className="size-4 text-muted-foreground" />
+                    </span>
+                  </div>
 
-              {note && (
-                <Box fontSize="13px" color="#FDA4AF" bg="rgba(244,63,94,0.12)" border="1px solid rgba(244,63,94,0.25)" rounded="10px" px={3} py={2} mt={2}>
-                  {note}
-                </Box>
-              )}
+                  {lead && (
+                    <p className="mt-1.5 line-clamp-2 text-[12px] leading-[1.6] text-muted-foreground">
+                      {lead}
+                    </p>
+                  )}
 
-              {links && <MapLinks links={links} />}
+                  {optionNames && (
+                    <p className="mt-1.5 line-clamp-1 text-[12px] font-semibold text-foreground/80">
+                      {optionNames}
+                    </p>
+                  )}
 
-              {options && (
-                <Box mt={3}>
-                  <Swiper
-                    modules={[FreeMode, Mousewheel]}
-                    freeMode
-                    mousewheel={{ forceToAxis: true }}
-                    grabCursor
-                    spaceBetween={12}
-                    slidesPerView={1.05}
-                    breakpoints={{ 640: { slidesPerView: 2.0 }, 1024: { slidesPerView: 2.2 } }}
-                    style={{ overflow: "visible", paddingBottom: 4 }}
-                  >
-                    {options.map((opt, i) => (
-                      <SwiperSlide key={i} style={{ height: "auto" }}>
-                        <OptionCard opt={opt} />
-                      </SwiperSlide>
-                    ))}
-                  </Swiper>
-                </Box>
-              )}
-            </Box>
+                  {note && (
+                    <div className="mt-2 rounded-lg bg-accent px-2.5 py-1.5">
+                      <p className="line-clamp-2 text-[11.5px] leading-[1.55] text-accent-foreground">
+                        {note}
+                      </p>
+                    </div>
+                  )}
+                </div>
+            </button>
           </Reveal>
-        </Box>
-      </Flex>
+        </div>
+      </div>
 
-      {legAfter && <LegRow label={legAfter} />}
+      {legAfter && <LegRow label={legAfter} icon={legIcon} />}
     </>
   );
 }

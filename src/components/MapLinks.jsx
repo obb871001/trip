@@ -1,43 +1,41 @@
-import { HStack, Box } from "@chakra-ui/react";
-import { FiMapPin, FiExternalLink } from "react-icons/fi";
+import { MapPin, ExternalLink, Phone, CalendarCheck } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const STYLES = {
-  gmap: { bg: "rgba(56,189,248,0.15)", color: "#7DD3FC", icon: <FiMapPin size={13} /> },
-  amap: { bg: "rgba(255,255,255,0.08)", color: "#E2E8F0", icon: <FiMapPin size={13} /> },
-  blog: { bg: "rgba(234,179,8,0.15)", color: "#FCD34D", icon: <FiExternalLink size={13} /> },
+  gmap: { accent: true, Icon: MapPin },
+  amap: { accent: false, Icon: MapPin },
+  blog: { accent: false, Icon: ExternalLink },
+  tel: { accent: true, Icon: Phone },
+  booking: { accent: true, Icon: CalendarCheck },
 };
 
 export default function MapLinks({ links = [] }) {
   if (!links.length) return null;
   return (
-    <HStack gap={2} flexWrap="wrap" mt={2.5}>
+    <div className="mt-2.5 flex flex-wrap gap-2">
       {links.map(([type, label, href], i) => {
-        const s = STYLES[type] || STYLES.blog;
+        const { accent, Icon } = STYLES[type] || STYLES.blog;
+        const external = type !== "tel";
         return (
-          <Box
-            as="a"
+          <Button
             key={i}
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            display="inline-flex"
-            alignItems="center"
-            gap={1.5}
-            fontSize="12.5px"
-            fontWeight="700"
-            px={3}
-            py={1.5}
-            rounded="full"
-            bg={s.bg}
-            color={s.color}
-            transition="transform .15s ease"
-            _hover={{ transform: "translateY(-2px)" }}
+            asChild
+            variant="outline"
+            size="sm"
+            className={cn(
+              "h-auto rounded-full bg-background px-2.5 py-1 text-[11.5px] font-semibold shadow-none",
+              accent ? "text-primary hover:text-primary" : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            {s.icon}
-            {label}
-          </Box>
+            <a href={href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined}>
+              <Icon className="size-3" />
+              {label}
+            </a>
+          </Button>
         );
       })}
-    </HStack>
+    </div>
   );
 }

@@ -1,29 +1,22 @@
-import { Box } from "@chakra-ui/react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
-const STYLES = {
-  free: { bg: "rgba(16,185,129,0.16)", color: "#6EE7B7" },
-  book: { bg: "rgba(249,115,22,0.18)", color: "#FDBA74" },
-  opt: { bg: "rgba(148,163,184,0.18)", color: "#CBD5E1" },
-  warn: { bg: "rgba(244,63,94,0.18)", color: "#FDA4AF" },
+// 行程標籤：對應 shadcn Badge 的 variant，重點色只留給「要訂位」與警告
+const MAP = {
+  free: { variant: "secondary" },
+  opt: { variant: "secondary" },
+  book: { variant: "default" },
+  warn: { variant: "outline", className: "border-primary/30 bg-accent text-accent-foreground" },
 };
 
 export default function Tag({ label, kind = "opt" }) {
-  const s = STYLES[kind] || STYLES.opt;
+  const m = MAP[kind] || MAP.opt;
   return (
-    <Box
-      as="span"
-      display="inline-block"
-      ml={2}
-      fontSize="11px"
-      fontWeight="700"
-      px={2.5}
-      py={0.5}
-      rounded="full"
-      verticalAlign="middle"
-      bg={s.bg}
-      color={s.color}
+    <Badge
+      variant={m.variant}
+      className={cn("ml-2 rounded-full align-middle text-[10.5px] font-bold shadow-none", m.className)}
     >
       {label}
-    </Box>
+    </Badge>
   );
 }

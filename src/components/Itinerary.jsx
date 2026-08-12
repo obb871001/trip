@@ -1,94 +1,116 @@
-import { Box, Container, Heading, Text, HStack } from "@chakra-ui/react";
+import { useState } from "react";
 import dayjs from "dayjs";
+import { ClipboardList } from "lucide-react";
 
-import { STOPS, TRIP_DATE } from "../data/itinerary";
+import { TRIPS, DEFAULT_TRIP_ID } from "@/data/itinerary";
+import { Card, CardContent } from "@/components/ui/card";
+import TripHeader from "./TripHeader";
+import TripCalendar from "./TripCalendar";
+import TripSummaryCard from "./TripSummaryCard";
+import NoticeBox from "./NoticeBox";
+import CollapseSection from "./CollapseSection";
 import StopCard from "./StopCard";
+import StopDetailSheet from "./StopDetailSheet";
 
-function Countdown() {
-  const days = dayjs(TRIP_DATE)
-    .startOf("day")
-    .diff(dayjs().startOf("day"), "day");
-  let label = "7 / 25（六）· 高雄出發";
-  if (days > 0) label = `出發倒數 ${days} 天 · 7/25（六）`;
-  return (
-    <HStack
-      display="inline-flex"
-      gap={2}
-      bg="rgba(255,255,255,0.06)"
-      border="1px solid"
-      borderColor="rgba(125,211,252,0.28)"
-      rounded="full"
-      px={4}
-      py={1.5}
-      boxShadow="0 6px 18px -10px rgba(0,0,0,0.6)"
-    >
-      <Box
-        w="7px"
-        h="7px"
-        rounded="full"
-        bg="aurora.tropical"
-        boxShadow="0 0 0 4px rgba(16,185,129,0.25)"
-      />
-      <Text fontWeight="700" fontSize="12.5px" color="#DCE9F3">
-        {label}
-      </Text>
-    </HStack>
-  );
+function SectionTitle({ children }) {
+  return <h2 className="mb-2.5 mt-6 text-[13px] font-extrabold text-foreground">{children}</h2>;
 }
 
 export default function Itinerary() {
+  const [tripId, setTripId] = useState(DEFAULT_TRIP_ID);
+  const trip = TRIPS.find((t) => t.id === tripId) || TRIPS[0];
+
+  // 月曆看的月份跟「目前選中的行程」分開：
+  // 可以自由翻到沒有行程的月份瀏覽，下方內容維持在選中的那一趟。
+  const [viewMonth, setViewMonth] = useState(() => dayjs(trip.date).startOf("month"));
+
+  // 點行程卡展開的詳細頁
+  const [openStopId, setOpenStopId] = useState(null);
+  const openStop = trip.stops.find((s) => s.id === openStopId) || null;
+
+  const selectTrip = (id) => {
+    const next = TRIPS.find((t) => t.id === id);
+    if (!next) return;
+    setTripId(id);
+    setViewMonth(dayjs(next.date).startOf("month"));
+  };
+
   let seq = 0;
 
   return (
-    <Container maxW="760px" py={{ base: 5, md: 8 }} px={4}>
-      {/* 標題（精簡，無 Hero） */}
-      <Box textAlign="center" pt={2} pb={7}>
-        <Countdown />
-        <Heading
-          as="h1"
-          fontWeight="900"
-          fontSize={{ base: "28px", md: "44px" }}
-          mt={4}
-          mb={1.5}
-          color="#EAF3FA"
-        >
-          嘉義
-          <Box
-            as="span"
-            display="inline-block"
-            style={{
-              backgroundImage:
-                "linear-gradient(120deg,#38BDF8,#A78BFA 55%,#FB7185)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              color: "transparent",
-            }}
-          >
-            一日行程
-          </Box>
-        </Heading>
-        <Text color="#9DB4C6" fontSize="15px" fontWeight="500">
-          第一站 天來美術館 → 收尾 桃城豆花
-        </Text>
-      </Box>
+    <div className="mx-auto min-h-[100dvh] max-w-app bg-background">
+      <TripHeader
+        trips={TRIPS}
+        trip={trip}
+        viewMonth={viewMonth}
+        onViewMonthChange={setViewMonth}
+        onSelectTrip={selectTrip}
+      />
 
-      {/* 路線時間軸 */}
-      <Box mt={2} position="relative">
-        {STOPS.map((stop, i) => {
-          const optional = stop.id === "optional";
-          if (!optional) seq += 1;
-          return (
-            <StopCard
-              key={stop.id}
-              stop={stop}
-              node={optional ? "★" : seq}
-              isFirst={i === 0}
-              isLast={i === STOPS.length - 1}
+      <main className="px-4 pb-14">
+        <Card className="rounded-xl shadow-none">
+          <CardContent className="p-3">
+            <TripCalendar
+              trips={TRIPS}
+              trip={trip}
+              viewMonth={viewMonth}
+              onViewMonthChange={setViewMonth}
+              onSelectTrip={selectTrip}
             />
-          );
-        })}
-      </Box>
-    </Container>
+          </CardContent>
+        </Card>
+
+        <div className="mt-3.5">
+          <TripSummaryCard trip={trip} />
+        </div>
+
+        {trip.notices?.length > 0 && (
+          <CollapseSection
+            key={`${trip.id}-notices`}
+            className="mt-5 rounded-xl border bg-secondary/40 px-3 py-1.5"
+            title="出發前"
+            hint={`${trip.notices.length} 項提醒`}
+            icon={ClipboardList}
+          >
+            <div className="pb-1 [&>*:last-child]:mb-0">
+              {trip.notices.map((n, i) => (
+                <NoticeBox
+                  key={`${trip.id}-notice-${i}`}
+                  kind={n.kind}
+                  title={n.title}
+                  rows={n.rows}
+                  plain
+                />
+              ))}
+            </div>
+          </CollapseSection>
+        )}
+
+        <SectionTitle>當天行程</SectionTitle>
+
+        <div>
+          {trip.stops.map((stop, i) => {
+            const optional = stop.optional === true || stop.id === "optional";
+            if (!optional) seq += 1;
+            return (
+              <StopCard
+                key={`${trip.id}-${stop.id}`}
+                stop={stop}
+                node={optional ? "★" : seq}
+                isFirst={i === 0}
+                isLast={i === trip.stops.length - 1}
+                onOpen={() => setOpenStopId(stop.id)}
+              />
+            );
+          })}
+        </div>
+      </main>
+
+      <StopDetailSheet
+        stop={openStop}
+        open={Boolean(openStop)}
+        onOpenChange={(v) => !v && setOpenStopId(null)}
+      />
+    </div>
   );
 }

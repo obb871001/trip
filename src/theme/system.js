@@ -1,66 +1,62 @@
 import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react";
 
-// Aurora UI 暗色設計系統：極光漸層 + 暗色玻璃質感
+// Tourminder 設計系統：淺灰米底 + 抹茶綠面板 + 深墨綠卡片
+// 色票直接取自 Figma variables（Green / Lime / Grey 1 / Grey 2 / White）
 const config = defineConfig({
   theme: {
     tokens: {
       fonts: {
-        heading: { value: "'Noto Sans TC', sans-serif" },
-        body: { value: "'Noto Sans TC', sans-serif" },
-        num: { value: "'Outfit', sans-serif" },
+        heading: { value: "'Nunito', 'Noto Sans TC Variable', 'Noto Sans TC', sans-serif" },
+        body: { value: "'Nunito', 'Noto Sans TC Variable', 'Noto Sans TC', sans-serif" },
+        num: { value: "'Nunito', 'Noto Sans TC Variable', 'Noto Sans TC', sans-serif" },
       },
       colors: {
-        brand: {
-          50: { value: "#F0F9FF" },
-          100: { value: "#E0F2FE" },
-          200: { value: "#BAE6FD" },
-          300: { value: "#7DD3FC" },
-          400: { value: "#38BDF8" },
-          500: { value: "#0EA5E9" },
-          600: { value: "#0284C7" },
-          700: { value: "#0369A1" },
-          800: { value: "#075985" },
-          900: { value: "#0C4A6E" },
-        },
-        accent: {
-          500: { value: "#F97316" },
-          600: { value: "#EA580C" },
-        },
-        aurora: {
-          coral: { value: "#FB7185" },
-          tropical: { value: "#10B981" },
-          sunset: { value: "#F59E0B" },
-          violet: { value: "#8B5CF6" },
-          cyan: { value: "#06B6D4" },
-        },
-        // 暗色語意 token
-        ink: {
-          bg: { value: "#060F1A" },
-          surface: { value: "rgba(255,255,255,0.05)" },
-          border: { value: "rgba(255,255,255,0.09)" },
-          text: { value: "#E8F1F8" },
-          muted: { value: "#9DB4C6" },
+        tm: {
+          green: { value: "#3A4646" },   // 主色：文字、深卡片底
+          lime: { value: "#C1CB9C" },    // 抹茶綠面板
+          grey1: { value: "#D0D0D0" },   // 分隔、次要
+          grey2: { value: "#E5E6E1" },   // 頁面底色、深卡片上的文字
+          white: { value: "#FFFFFF" },
         },
       },
       radii: {
-        card: { value: "22px" },
+        card: { value: "24px" },
+        pill: { value: "32px" },
+        chip: { value: "21px" },
+      },
+    },
+    semanticTokens: {
+      colors: {
+        "tm.onGreen": { value: "#E5E6E1" },
+        "tm.onGreenMuted": { value: "rgba(229,230,225,0.72)" },
+        "tm.inkMuted": { value: "rgba(58,70,70,0.62)" },
+        "tm.inkFaint": { value: "rgba(58,70,70,0.24)" },
+        "tm.hairline": { value: "rgba(58,70,70,0.18)" },
       },
     },
   },
   globalCss: {
     "html, body, #root": { minHeight: "100%" },
     body: {
-      background: "#060F1A",
-      color: "#E8F1F8",
+      background: "#E5E6E1",
+      color: "#3A4646",
       fontFamily: "body",
       overflowX: "hidden",
-      lineHeight: 1.7,
+      lineHeight: 1.6,
+      WebkitFontSmoothing: "antialiased",
     },
-    "::selection": { background: "rgba(56,189,248,0.35)" },
-    "@keyframes wl-pulse": {
-      "0%, 100%": { opacity: 0.5 },
-      "50%": { opacity: 0.85 },
+    "::selection": { background: "rgba(193,203,156,0.55)" },
+    // 年／月橫向捲動列：隱藏捲軸
+    ".tm-scroll": {
+      overflowX: "auto",
+      scrollbarWidth: "none",
+      msOverflowStyle: "none",
+      maskImage:
+        "linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 28px), transparent 100%)",
+      WebkitMaskImage:
+        "linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 28px), transparent 100%)",
     },
+    ".tm-scroll::-webkit-scrollbar": { display: "none" },
   },
 });
 

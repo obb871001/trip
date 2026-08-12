@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Tourava：白底 + 灰卡 + 珊瑚紅重點色，映射到 shadcn 的語意 token */
+    --background: 0 0% 100%;
+    --foreground: 220 6% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 6% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 6% 10%;
+
+    --primary: 7 100% 62%;          /* #FF543D */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 180 5% 96%;        /* #F4F5F5 卡片灰 */
+    --secondary-foreground: 220 6% 10%;
+
+    --muted: 180 5% 96%;
+    --muted-foreground: 213 4% 50%; /* #7A7F85 */
+
+    --accent: 9 100% 96%;           /* #FFEDEA 主色淺底 */
+    --accent-foreground: 7 100% 62%;
+
+    --destructive: 7 100% 62%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 180 3% 93%;           /* #ECEDED */
+    --input: 180 3% 93%;
+    --ring: 7 100% 62%;
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  button {
+    font-family: inherit;
+  }
+}
+
+@layer components {
+  /* 年／月橫向捲動列：隱藏捲軸、右緣漸隱 */
+  .tm-scroll {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 10px,
+      #000 calc(100% - 24px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 10px,
+      #000 calc(100% - 24px),
+      transparent 100%
+    );
+  }
+  .tm-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}
