@@ -58,10 +58,27 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        // 「現在這一站」的呼吸光暈
+        "now-glow": {
+          "0%, 100%": {
+            boxShadow:
+              "0 0 0 1.5px hsl(var(--primary) / 0.45), 0 0 0 0 hsl(var(--primary) / 0)",
+          },
+          "50%": {
+            boxShadow:
+              "0 0 0 1.5px hsl(var(--primary) / 0.9), 0 0 20px 4px hsl(var(--primary) / 0.28)",
+          },
+        },
+        "now-dot": {
+          "0%, 100%": { opacity: "1", transform: "scale(1)" },
+          "50%": { opacity: "0.35", transform: "scale(0.75)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "now-glow": "now-glow 2.4s ease-in-out infinite",
+        "now-dot": "now-dot 1.6s ease-in-out infinite",
       },
     },
   },

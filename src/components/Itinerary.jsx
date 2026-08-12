@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
 import { ClipboardList } from "lucide-react";
 
 import { TRIPS, DEFAULT_TRIP_ID } from "@/data/itinerary";
+import { useNow, resolveActiveStop } from "@/lib/schedule";
 import { Card, CardContent } from "@/components/ui/card";
+import NowButton from "./NowButton";
 import TripHeader from "./TripHeader";
 import TripCalendar from "./TripCalendar";
 import TripSummaryCard from "./TripSummaryCard";
@@ -35,6 +37,49 @@ export default function Itinerary() {
     setViewMonth(dayjs(next.date).startOf("month"));
   };
 
+  // ── 現在走到哪一站 ────────────────────────────────
+  const now = useNow();
+  const minutesOfDay = now.hour() * 60 + now.minute();
+  const active = useMemo(
+    () => resolveActiveStop(trip.stops, minutesOfDay),
+    [trip.stops, minutesOfDay]
+  );
+  const activeStop = active && trip.stops.find((s) => s.id === active.id);
+  const anchorOf = (id) => `stop-${trip.id}-${id}`;
+
+  const scrollToNow = useCallback(() => {
+    if (!active) return;
+    document.getElementById(anchorOf(active.id))?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active?.id, trip.id]);
+
+  // 行程當天一進來就自動捲到當下那一站
+  const autoScrolled = useRef(null);
+  const isTripDay = now.isSame(dayjs(trip.date), "day");
+  useEffect(() => {
+    if (!isTripDay || !active || autoScrolled.current === trip.id) return;
+    autoScrolled.current = trip.id;
+    const t = setTimeout(scrollToNow, 500);
+    return () => clearTimeout(t);
+  }, [isTripDay, active, trip.id, scrollToNow]);
+
+  // 那張卡不在畫面上時才顯示浮動按鈕
+  const [offScreen, setOffScreen] = useState(false);
+  useEffect(() => {
+    if (!active) return undefined;
+    const el = document.getElementById(anchorOf(active.id));
+    if (!el || typeof IntersectionObserver === "undefined") return undefined;
+    const io = new IntersectionObserver(([e]) => setOffScreen(!e.isIntersecting), {
+      threshold: 0.35,
+    });
+    io.observe(el);
+    return () => io.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active?.id, trip.id]);
+
   let seq = 0;
 
   return (
@@ -44,7 +89,7 @@ export default function Itinerary() {
         trip={trip}
         viewMonth={viewMonth}
         onViewMonthChange={setViewMonth}
-        onSelectTrip={selectTrip}
+        now={now}
       />
 
       <main className="px-4 pb-14">
@@ -100,11 +145,22 @@ export default function Itinerary() {
                 isFirst={i === 0}
                 isLast={i === trip.stops.length - 1}
                 onOpen={() => setOpenStopId(stop.id)}
+                anchorId={anchorOf(stop.id)}
+                nowStatus={active?.id === stop.id ? active.status : null}
+                live={isTripDay}
               />
             );
           })}
         </div>
       </main>
+
+      <NowButton
+        status={active?.status}
+        title={activeStop?.title}
+        live={isTripDay}
+        visible={Boolean(active && activeStop) && offScreen && !openStop}
+        onClick={scrollToNow}
+      />
 
       <StopDetailSheet
         stop={openStop}

@@ -56,6 +56,7 @@ postcss.config.js
 src/
 ├── index.css                # Tailwind 三層 + :root 色票變數 + .tm-scroll
 ├── lib/utils.js             # shadcn 的 cn()
+├── lib/schedule.js          # useNow()、解析 stop.time、判斷現在走到哪一站
 ├── components/ui/           # shadcn 元件：card / badge / button / separator / calendar / sheet / tabs
 ├── data/itinerary.js        # 全部行程內容（改這裡就能改行程）
 ├── components/
@@ -67,6 +68,7 @@ src/
 │   ├── StopDetailSheet.jsx  # 行程詳細頁（底部 Sheet）：照片、資訊、地圖、在地評價
 │   ├── CopyAddress.jsx      # 可一鍵複製的地址列
 │   ├── CollapseSection.jsx  # 可展開／收合的區塊（出發前提醒、詳細頁的備案）
+│   ├── NowButton.jsx        # 浮在下緣的「跳到現在」按鈕
 │   ├── NoticeBox.jsx        # 注意事項 / 雨天備案 / 高溫提醒（plain 版不包 Reveal）
 │   ├── MapLinks.jsx         # Google / Apple 地圖、電話與參考連結
 │   ├── Tag.jsx
@@ -137,4 +139,6 @@ src/
 - 每一站都備 1–2 個備案（`alternatives`），摘要卡右上角會顯示淡色的「備案 N」，內容在詳細頁「資訊」分頁最下方、`選項` 之後，預設收起來。備案跟 `options` 不同：`options` 是當天要二選一，`alternatives` 是主要選擇失效時的退路，權重刻意壓低。
 - 「出發前」的提醒也是收合的（`CollapseSection`），只留一行標題與提醒數量，點開才展開。放進收合區塊的 `NoticeBox` 要加 `plain`，否則 Framer Motion 的 `whileInView` 在高度 0 的容器裡不會觸發，展開後會是空白。
 - 上方的年份與月份併成同一列：左邊是固定的年份切換（`‹ 2026 ›`，該年有行程會有紅點），右邊是可橫捲的 12 個月。
+- 標題列會顯示現在時間（每 30 秒更新一次），時間軸會依現在的鐘點標出「現在」那一站：卡片邊框發光、節點變成重點色並有一圈擴散的漣漪、時間標籤轉紅。判斷邏輯在 `src/lib/schedule.js`：`parseStopWindow()` 從 `stop.time` 抓出 `HH:MM`（支援 `13:15–15:30` 這種區間），沒寫結束時間的站用下一站的開始時間補；`resolveActiveStop()` 回傳 `now`／`next`／`done`。「備案」「口袋」這種沒有時間的站不參與。
+- 行程當天（`now` 與 `trip.date` 同一天）一進頁面會自動捲到當下那一站；不是當天則不自動捲，標籤也改成「現在時段／下個時段」，避免看起來像今天要出發。那張卡捲出畫面時，下緣會浮出「現在 · ⟨站名⟩」的按鈕，點了跳回去。發光動畫都有 `motion-reduce` 的退路。
 - 時間軸上的卡片只放摘要（縮圖、時間、標題、第一行 meta、選項名稱、提醒各截兩行），完整的 meta、選項說明、地圖與在地評價都在點開後的詳細頁。要改摘要顯示哪些欄位就改 `StopCard.jsx`。

@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Users } from "lucide-react";
 import dayjs from "dayjs";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatNow } from "@/lib/schedule";
 import { cn } from "@/lib/utils";
 
 const MONTHS = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
@@ -48,7 +49,7 @@ function useScrollActiveIntoView(dep) {
   return ref;
 }
 
-export default function TripHeader({ trips, trip, viewMonth, onViewMonthChange, onSelectTrip }) {
+export default function TripHeader({ trips, trip, viewMonth, onViewMonthChange, now }) {
   const tripDate = dayjs(trip.date);
   const viewYear = viewMonth.year();
   const monthRow = useScrollActiveIntoView(`${viewYear}-${viewMonth.month()}`);
@@ -61,7 +62,8 @@ export default function TripHeader({ trips, trip, viewMonth, onViewMonthChange, 
       return d.year() === year && d.month() === month;
     });
 
-  const daysLeft = tripDate.startOf("day").diff(dayjs().startOf("day"), "day");
+  const today = now || dayjs();
+  const daysLeft = tripDate.startOf("day").diff(today.startOf("day"), "day");
   const greeting =
     daysLeft > 0 ? `出發倒數 ${daysLeft} 天` : daysLeft === 0 ? "就是今天" : "已完成的行程";
 
@@ -69,7 +71,14 @@ export default function TripHeader({ trips, trip, viewMonth, onViewMonthChange, 
     <header className="px-4 pb-3.5 pt-5">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-medium leading-[1.5] text-muted-foreground">{greeting}</p>
+          <p className="flex items-center gap-1.5 text-[11px] font-medium leading-[1.5] text-muted-foreground">
+            {greeting}
+            <span className="text-muted-foreground/40">·</span>
+            <span className="inline-flex items-center gap-1 tabular-nums">
+              <Clock className="size-3" />
+              {formatNow(today)}
+            </span>
+          </p>
           <h1 className="whitespace-nowrap text-xl font-bold leading-[1.35] text-foreground">
             {trip.tab}
             <span className="ml-2 text-[13px] font-medium text-muted-foreground">

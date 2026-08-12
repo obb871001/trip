@@ -1,20 +1,29 @@
 import { Car, ChevronRight, Footprints, Ship } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import Reveal from "./Reveal";
 import Tag from "./Tag";
 
 const LEG_ICONS = { car: Car, walk: Footprints, ferry: Ship };
 
 // 左側時間軸：細線 + 編號節點
-function Rail({ node, isFirst, isLast, hasLeg }) {
+function Rail({ node, isFirst, isLast, hasLeg, isNow }) {
   return (
     <div className="relative w-[42px] shrink-0">
       {!isFirst && <span className="absolute left-[21px] top-0 h-[26px] w-px -translate-x-1/2 bg-border" />}
       {(hasLeg || !isLast) && (
         <span className="absolute bottom-0 left-[21px] top-[26px] w-px -translate-x-1/2 bg-border" />
       )}
-      <span className="absolute left-[21px] top-3 flex size-6 -translate-x-1/2 items-center justify-center rounded-full bg-foreground text-[11px] font-bold text-background ring-4 ring-background">
+      {isNow && (
+        <span className="absolute left-[21px] top-3 size-6 -translate-x-1/2 animate-ping rounded-full bg-primary/40 motion-reduce:hidden" />
+      )}
+      <span
+        className={cn(
+          "absolute left-[21px] top-3 flex size-6 -translate-x-1/2 items-center justify-center rounded-full text-[11px] font-bold ring-4 ring-background",
+          isNow ? "bg-primary text-primary-foreground" : "bg-foreground text-background"
+        )}
+      >
         {node}
       </span>
     </div>
@@ -41,17 +50,19 @@ function LegRow({ label, icon = "car" }) {
 }
 
 // 時間軸上的卡片只放摘要，細節都在詳細頁（點卡片展開）
-export default function StopCard({ stop, node, isFirst, isLast, onOpen }) {
+export default function StopCard({ stop, node, isFirst, isLast, onOpen, nowStatus, live, anchorId }) {
   const { time, title, tags, meta, note, options, photo, legAfter, legIcon } = stop;
 
   const lead = meta?.[0]?.[1];
   const optionNames = options?.map((o) => o.name).join("・");
   const altCount = stop.alternatives?.length || 0;
+  const isNow = nowStatus === "now";
+  const isNext = nowStatus === "next";
 
   return (
     <>
-      <div className="flex items-stretch">
-        <Rail node={node} isFirst={isFirst} isLast={isLast} hasLeg={!!legAfter} />
+      <div className="flex items-stretch" id={anchorId} style={{ scrollMarginTop: "84px" }}>
+        <Rail node={node} isFirst={isFirst} isLast={isLast} hasLeg={!!legAfter} isNow={isNow} />
 
         <div className={`min-w-0 flex-1 ${legAfter ? "" : "pb-3"}`}>
           <Reveal>
@@ -59,7 +70,15 @@ export default function StopCard({ stop, node, isFirst, isLast, onOpen }) {
               type="button"
               onClick={onOpen}
               aria-label={`查看 ${title} 的詳細資訊`}
-              className="w-full overflow-hidden rounded-xl border bg-secondary text-left transition-colors hover:bg-secondary/70"
+              aria-current={isNow ? "time" : undefined}
+              className={cn(
+                "w-full overflow-hidden rounded-xl border text-left transition-colors",
+                isNow
+                  ? "animate-now-glow border-primary/50 bg-accent motion-reduce:animate-none motion-reduce:ring-2 motion-reduce:ring-primary/60"
+                  : isNext
+                    ? "border-primary/30 bg-secondary hover:bg-secondary/70"
+                    : "bg-secondary hover:bg-secondary/70"
+              )}
             >
                 {photo && (
                   <div className="relative">
@@ -77,10 +96,28 @@ export default function StopCard({ stop, node, isFirst, isLast, onOpen }) {
                     <div className="flex flex-1 flex-wrap items-center gap-2">
                       <Badge
                         variant="outline"
-                        className="shrink-0 rounded-full bg-background text-[10.5px] font-bold shadow-none"
+                        className={cn(
+                          "shrink-0 rounded-full bg-background text-[10.5px] font-bold shadow-none",
+                          isNow && "border-primary/50 text-primary"
+                        )}
                       >
                         {time}
                       </Badge>
+                      {(isNow || isNext) && (
+                        <span
+                          className={cn(
+                            "inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-px text-[10px] font-bold",
+                            isNow
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-background text-muted-foreground"
+                          )}
+                        >
+                          {isNow && (
+                            <span className="size-1.5 animate-now-dot rounded-full bg-primary-foreground motion-reduce:animate-none" />
+                          )}
+                          {isNow ? (live ? "現在" : "現在時段") : live ? "接下來" : "下個時段"}
+                        </span>
+                      )}
                       <h3 className="text-[15px] font-bold leading-[1.3] text-foreground">
                         {title}
                         {tags?.map((t, i) => <Tag key={i} label={t[0]} kind={t[1]} />)}
@@ -109,7 +146,7 @@ export default function StopCard({ stop, node, isFirst, isLast, onOpen }) {
                   )}
 
                   {note && (
-                    <div className="mt-2 rounded-lg bg-accent px-2.5 py-1.5">
+                    <div className={cn("mt-2 rounded-lg px-2.5 py-1.5", isNow ? "bg-background/70" : "bg-accent")}>
                       <p className="line-clamp-2 text-[11.5px] leading-[1.55] text-accent-foreground">
                         {note}
                       </p>
